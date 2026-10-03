@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Poi (Spring Boot)",
+      "request": "launch",
+      "mainClass": "lat.soulware.poi.PoiApplication",
+      "projectName": "poi",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
