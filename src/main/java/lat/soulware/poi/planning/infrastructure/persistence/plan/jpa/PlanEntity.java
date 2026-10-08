@@ -30,6 +30,9 @@ public class PlanEntity {
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private boolean completed;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "plan_id", nullable = false, updatable = false)
     private Set<ObjectiveRow> objectives = new LinkedHashSet<>();
@@ -43,12 +46,14 @@ public class PlanEntity {
         String code,
         String name,
         String description,
+        boolean completed,
         Set<ObjectiveRow> objectives
     ) {
         this.id = id;
         this.code = code;
         this.name = name;
         this.description = description;
+        this.completed = completed;
         this.objectives = objectives;
     }
 
@@ -66,6 +71,10 @@ public class PlanEntity {
 
     public String getDescription() {
         return this.description;
+    }
+
+    public boolean isCompleted() {
+        return this.completed;
     }
 
     public Set<ObjectiveRow> getObjectives() {

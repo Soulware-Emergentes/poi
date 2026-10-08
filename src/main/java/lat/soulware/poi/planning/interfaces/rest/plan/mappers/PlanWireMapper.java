@@ -99,6 +99,7 @@ public final class PlanWireMapper implements WireMapper {
             plan.code(),
             plan.name(),
             plan.description(),
+            plan.completed(),
             plan.objectives().stream()
                 .map(PlanWireMapper::toObjectiveResponse)
                 .toList()
@@ -111,6 +112,7 @@ public final class PlanWireMapper implements WireMapper {
             objective.code(),
             objective.name(),
             objective.description(),
+            objective.completed(),
             objective.activities().stream()
                 .map(PlanWireMapper::toActivityResponse)
                 .toList()
@@ -124,7 +126,8 @@ public final class PlanWireMapper implements WireMapper {
             activity.name(),
             activity.description(),
             activity.measurementUnit(),
-            activity.target()
+            activity.target(),
+            activity.completed()
         );
     }
 }

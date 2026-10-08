@@ -33,6 +33,9 @@ public class ObjectiveRow {
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private boolean completed;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "objective_id", nullable = false, updatable = false)
     private Set<ActivityRow> activities = new LinkedHashSet<>();
@@ -41,11 +44,19 @@ public class ObjectiveRow {
     protected ObjectiveRow() {
     }
 
-    public ObjectiveRow(UUID id, String code, String name, String description, Set<ActivityRow> activities) {
+    public ObjectiveRow(
+        UUID id,
+        String code,
+        String name,
+        String description,
+        boolean completed,
+        Set<ActivityRow> activities
+    ) {
         this.id = id;
         this.code = code;
         this.name = name;
         this.description = description;
+        this.completed = completed;
         this.activities = activities;
     }
 
@@ -63,6 +74,10 @@ public class ObjectiveRow {
 
     public String getDescription() {
         return this.description;
+    }
+
+    public boolean isCompleted() {
+        return this.completed;
     }
 
     public Set<ActivityRow> getActivities() {

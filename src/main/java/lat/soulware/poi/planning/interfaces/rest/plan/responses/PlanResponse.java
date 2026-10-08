@@ -10,6 +10,7 @@ import java.util.UUID;
  * @param code        the plan's code
  * @param name        what the plan is called
  * @param description what the plan is
+ * @param completed   whether it has objectives and every one of them is complete
  * @param objectives  the objectives it holds
  */
 public record PlanResponse(
@@ -17,6 +18,7 @@ public record PlanResponse(
     String code,
     String name,
     String description,
+    boolean completed,
     List<ObjectiveResponse> objectives
 ) {
 }

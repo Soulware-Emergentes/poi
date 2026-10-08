@@ -29,20 +29,20 @@ import lat.soulware.poi.planning.application.queries.plans.results.PlanResult;
 public class JdbcPlanProjection implements PlanProjection {
 
     private static final String FIND_PLANS = """
-        SELECT id, code, name, description
+        SELECT id, code, name, description, completed
         FROM plans
         WHERE CAST(:planId AS UUID) IS NULL OR id = :planId
         ORDER BY code""";
 
     private static final String FIND_OBJECTIVES = """
-        SELECT id, plan_id, code, name, description
+        SELECT id, plan_id, code, name, description, completed
         FROM objectives
         WHERE (CAST(:planId AS UUID) IS NULL OR plan_id = :planId)
             AND (CAST(:objectiveId AS UUID) IS NULL OR id = :objectiveId)
         ORDER BY code""";
 
     private static final String FIND_ACTIVITIES = """
-        SELECT a.id, a.objective_id, a.code, a.name, a.description, a.measurement_unit, a.target
+        SELECT a.id, a.objective_id, a.code, a.name, a.description, a.measurement_unit, a.target, a.completed
         FROM activities a
         JOIN objectives o ON o.id = a.objective_id
         WHERE (CAST(:planId AS UUID) IS NULL OR o.plan_id = :planId)
@@ -50,7 +50,7 @@ public class JdbcPlanProjection implements PlanProjection {
         ORDER BY a.code""";
 
     private static final String FIND_ACTIVITY = """
-        SELECT id, code, name, description, measurement_unit, target
+        SELECT id, code, name, description, measurement_unit, target, completed
         FROM activities
         WHERE id = :activityId""";
 
@@ -92,6 +92,7 @@ public class JdbcPlanProjection implements PlanProjection {
                 row.getString("code"),
                 row.getString("name"),
                 row.getString("description"),
+                row.getBoolean("completed"),
                 objectivesByPlan.getOrDefault(id, List.of())
             );
         });
@@ -107,7 +108,8 @@ public class JdbcPlanProjection implements PlanProjection {
                 row.getString("name"),
                 row.getString("description"),
                 row.getString("measurement_unit"),
-                row.getLong("target")
+                row.getLong("target"),
+                row.getBoolean("completed")
             ))
             .stream()
             .findFirst();
@@ -127,6 +129,7 @@ public class JdbcPlanProjection implements PlanProjection {
                     row.getString("code"),
                     row.getString("name"),
                     row.getString("description"),
+                    row.getBoolean("completed"),
                     activitiesByObjective.getOrDefault(id, List.of())
                 );
 
@@ -147,7 +150,8 @@ public class JdbcPlanProjection implements PlanProjection {
                 row.getString("name"),
                 row.getString("description"),
                 row.getString("measurement_unit"),
-                row.getLong("target")
+                row.getLong("target"),
+                row.getBoolean("completed")
             ))
         );
 

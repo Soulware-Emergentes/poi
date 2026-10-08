@@ -26,6 +26,7 @@ import lat.soulware.poi.planning.domain.model.valueobjects.ObjectiveId;
 import lat.soulware.poi.planning.domain.model.valueobjects.PlanCode;
 import lat.soulware.poi.planning.domain.model.valueobjects.PlanId;
 import lat.soulware.poi.planning.domain.model.valueobjects.Target;
+import lat.soulware.poi.planning.domain.model.valueobjects.TaskId;
 import lat.soulware.poi.planning.domain.repositories.PlanRepository;
 import lat.soulware.poi.planning.infrastructure.persistence.plan.jpa.ActivityRow;
 import lat.soulware.poi.planning.infrastructure.persistence.plan.jpa.ObjectiveRow;
@@ -36,7 +37,8 @@ import lat.soulware.poi.shared.infrastructure.persistence.adapter.JpaRepositoryT
 
 /**
  * Stores plans in the {@code plans} table, their objectives in {@code objectives} and the activities
- * under those in {@code activities}, each code as written. Rows are matched by id when a plan is
+ * under those in {@code activities}, each code as written, with whether each is complete. The tasks
+ * an activity still has open go to {@code activity_open_tasks}. Rows are matched by id when a plan is
  * saved again, so an objective or activity defined since it was loaded is inserted and the rest are
  * left as they are.
  */
@@ -56,6 +58,12 @@ public class JpaPlanRepositoryAdapter
     @Override
     public Optional<Plan> findByCode(PlanCode code) {
         return this.delegate.findByCode(code.value())
+            .map(this::toAggregate);
+    }
+
+    @Override
+    public Optional<Plan> findByActivity(ActivityId activityId) {
+        return this.delegate.findByActivityId(activityId.value())
             .map(this::toAggregate);
     }
 
@@ -80,6 +88,7 @@ public class JpaPlanRepositoryAdapter
             aggregate.getCode().value(),
             aggregate.getName().value(),
             aggregate.getDescription().value(),
+            aggregate.isComplete(),
             objectives
         );
     }
@@ -92,7 +101,12 @@ public class JpaPlanRepositoryAdapter
                 activity.getName().value(),
                 activity.getDescription().value(),
                 activity.getMeasurementUnit().value(),
-                activity.getTarget().units()
+                activity.getTarget().units(),
+                activity.hasTasks(),
+                activity.isComplete(),
+                activity.getOpenTasks().stream()
+                    .map(taskId -> taskId.value())
+                    .collect(Collectors.toCollection(LinkedHashSet::new))
             ))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -101,6 +115,7 @@ public class JpaPlanRepositoryAdapter
             objective.getCode().value(),
             objective.getName().value(),
             objective.getDescription().value(),
+            objective.isComplete(),
             activities
         );
     }
@@ -130,7 +145,11 @@ public class JpaPlanRepositoryAdapter
                 new Name(activity.getName()),
                 new Description(activity.getDescription()),
                 new MeasurementUnit(activity.getMeasurementUnit()),
-                new Target(activity.getTarget())
+                new Target(activity.getTarget()),
+                activity.getOpenTasks().stream()
+                    .map(taskId -> new TaskId(taskId))
+                    .collect(Collectors.toSet()),
+                activity.hasTasks()
             ))
             .toList();
 

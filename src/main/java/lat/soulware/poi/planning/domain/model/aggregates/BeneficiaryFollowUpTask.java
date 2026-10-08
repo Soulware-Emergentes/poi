@@ -1,7 +1,9 @@
 package lat.soulware.poi.planning.domain.model.aggregates;
 
+import java.time.Instant;
 import java.util.Optional;
 
+import lat.soulware.poi.planning.domain.model.events.TaskDefined;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingBeneficiaryIdException;
 import lat.soulware.poi.planning.domain.model.valueobjects.ActivityCode;
 import lat.soulware.poi.planning.domain.model.valueobjects.ActivityId;
@@ -41,7 +43,8 @@ public class BeneficiaryFollowUpTask extends Task {
 
     /**
      * Defines a task under an activity, numbered right after the last task there, of any kind, or
-     * 0001 when it is the first.
+     * 0001 when it is the first, and announces it so the plan counts the activity open until the
+     * task is completed.
      *
      * @param id            the task's identity
      * @param activityId    the activity the task is planned under
@@ -62,7 +65,7 @@ public class BeneficiaryFollowUpTask extends Task {
         TaskCode code = lastTask.map(task -> task.getCode().next())
             .orElse(new TaskCode(activityCode, 1));
 
-        return new BeneficiaryFollowUpTask(
+        BeneficiaryFollowUpTask task = new BeneficiaryFollowUpTask(
             id,
             activityId,
             code,
@@ -72,6 +75,8 @@ public class BeneficiaryFollowUpTask extends Task {
             null,
             null
         );
+        task.registerEvent(new TaskDefined(id, activityId, Instant.now()));
+        return task;
     }
 
     /**

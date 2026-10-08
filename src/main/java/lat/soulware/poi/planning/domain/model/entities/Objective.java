@@ -3,6 +3,7 @@ package lat.soulware.poi.planning.domain.model.entities;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import lat.soulware.poi.planning.domain.model.exceptions.MissingObjectiveCodeException;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingDescriptionException;
@@ -20,7 +21,7 @@ import lat.soulware.poi.shared.domain.model.entities.Entity;
 /**
  * What a plan sets out to achieve, inside the plan that defines it. Its progress is its activities'
  * progress; it holds no target of its own. Its activities are numbered under it in the order they
- * are defined.
+ * are defined. It is complete once it has activities and every one of them is complete.
  */
 public class Objective extends Entity<ObjectiveId> {
     private final ObjectiveId id;
@@ -107,6 +108,22 @@ public class Objective extends Entity<ObjectiveId> {
             .orElse(new ActivityCode(this.code, 1));
 
         this.activities.add(Activity.define(id, code, name, description, measurementUnit, target));
+    }
+
+    /**
+     * @param activityId an activity's identity
+     * @return the activity under this objective with that identity, empty when it holds none
+     */
+    public Optional<Activity> activity(ActivityId activityId) {
+        return this.activities.stream()
+            .filter(activity -> activity.getId().equals(activityId))
+            .findFirst();
+    }
+
+    /** @return whether it has activities and every one of them is complete */
+    public boolean isComplete() {
+        return !this.activities.isEmpty() && this.activities.stream()
+            .allMatch(activity -> activity.isComplete());
     }
 
     @Override

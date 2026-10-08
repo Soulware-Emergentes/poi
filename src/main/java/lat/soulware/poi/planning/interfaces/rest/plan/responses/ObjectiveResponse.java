@@ -10,6 +10,7 @@ import java.util.UUID;
  * @param code        the objective's code
  * @param name        what the objective is called
  * @param description what the objective is
+ * @param completed   whether it has activities and every one of them is complete
  * @param activities  the activities it is pursued through
  */
 public record ObjectiveResponse(
@@ -17,6 +18,7 @@ public record ObjectiveResponse(
     String code,
     String name,
     String description,
+    boolean completed,
     List<ActivityResponse> activities
 ) {
 }

@@ -1,5 +1,8 @@
 package lat.soulware.poi.planning.domain.model.entities;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import lat.soulware.poi.planning.domain.model.exceptions.MissingActivityCodeException;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingDescriptionException;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingNameException;
@@ -11,11 +14,16 @@ import lat.soulware.poi.planning.domain.model.valueobjects.Description;
 import lat.soulware.poi.planning.domain.model.valueobjects.Name;
 import lat.soulware.poi.planning.domain.model.valueobjects.MeasurementUnit;
 import lat.soulware.poi.planning.domain.model.valueobjects.Target;
+import lat.soulware.poi.planning.domain.model.valueobjects.TaskId;
 import lat.soulware.poi.shared.domain.model.entities.Entity;
 
 /**
  * Work an objective is pursued through, measured in a unit and set against a target. Each task
  * completed under it delivers one unit, and a unit delivered twice counts once.
+ *
+ * <p>It is complete once it has tasks and every one of them is completed. It keeps the tasks still
+ * open, so hearing of the same task twice changes nothing, and a task defined after it completed
+ * opens it again.
  */
 public class Activity extends Entity<ActivityId> {
     private final ActivityId id;
@@ -24,6 +32,8 @@ public class Activity extends Entity<ActivityId> {
     private final Description description;
     private final MeasurementUnit measurementUnit;
     private final Target target;
+    private final Set<TaskId> openTasks;
+    private boolean hasTasks;
 
     private Activity(
         ActivityId id,
@@ -31,7 +41,9 @@ public class Activity extends Entity<ActivityId> {
         Name name,
         Description description,
         MeasurementUnit measurementUnit,
-        Target target
+        Target target,
+        Set<TaskId> openTasks,
+        boolean hasTasks
     ) {
         if (code == null) {
             throw new MissingActivityCodeException();
@@ -54,6 +66,8 @@ public class Activity extends Entity<ActivityId> {
         this.description = description;
         this.measurementUnit = measurementUnit;
         this.target = target;
+        this.openTasks = new LinkedHashSet<>(openTasks);
+        this.hasTasks = hasTasks;
     }
 
     /**
@@ -63,7 +77,7 @@ public class Activity extends Entity<ActivityId> {
      * @param description     what the activity is
      * @param measurementUnit what it counts toward its target
      * @param target          how many units it sets out to deliver
-     * @return the defined activity
+     * @return the defined activity, with no tasks yet
      */
     public static Activity define(
         ActivityId id,
@@ -73,7 +87,7 @@ public class Activity extends Entity<ActivityId> {
         MeasurementUnit measurementUnit,
         Target target
     ) {
-        return new Activity(id, code, name, description, measurementUnit, target);
+        return new Activity(id, code, name, description, measurementUnit, target, Set.of(), false);
     }
 
     /**
@@ -85,6 +99,8 @@ public class Activity extends Entity<ActivityId> {
      * @param description     what the activity is
      * @param measurementUnit what it counts toward its target
      * @param target          how many units it sets out to deliver
+     * @param openTasks       the tasks defined under it and not yet completed
+     * @param hasTasks        whether any task was ever defined under it
      * @return the activity as stored
      */
     public static Activity reconstitute(
@@ -93,9 +109,36 @@ public class Activity extends Entity<ActivityId> {
         Name name,
         Description description,
         MeasurementUnit measurementUnit,
-        Target target
+        Target target,
+        Set<TaskId> openTasks,
+        boolean hasTasks
     ) {
-        return new Activity(id, code, name, description, measurementUnit, target);
+        return new Activity(id, code, name, description, measurementUnit, target, openTasks, hasTasks);
+    }
+
+    /**
+     * Counts a task defined under this activity as open, which leaves the activity incomplete until
+     * the task is completed.
+     *
+     * @param taskId the defined task
+     */
+    public void trackTask(TaskId taskId) {
+        this.openTasks.add(taskId);
+        this.hasTasks = true;
+    }
+
+    /**
+     * Stops counting a completed task as open. A task no longer open is left as it is.
+     *
+     * @param taskId the completed task
+     */
+    public void recordTaskCompletion(TaskId taskId) {
+        this.openTasks.remove(taskId);
+    }
+
+    /** @return whether tasks were defined under it and every one of them is completed */
+    public boolean isComplete() {
+        return this.hasTasks && this.openTasks.isEmpty();
     }
 
     @Override
@@ -121,5 +164,13 @@ public class Activity extends Entity<ActivityId> {
 
     public Target getTarget() {
         return this.target;
+    }
+
+    public Set<TaskId> getOpenTasks() {
+        return Set.copyOf(this.openTasks);
+    }
+
+    public boolean hasTasks() {
+        return this.hasTasks;
     }
 }

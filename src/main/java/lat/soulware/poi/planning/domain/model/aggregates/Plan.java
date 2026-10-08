@@ -5,7 +5,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import lat.soulware.poi.planning.domain.model.entities.Activity;
 import lat.soulware.poi.planning.domain.model.entities.Objective;
+import lat.soulware.poi.planning.domain.model.exceptions.ActivityNotFoundException;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingPlanCodeException;
 import lat.soulware.poi.planning.domain.model.exceptions.PlanCodeTakenException;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingDescriptionException;
@@ -20,6 +22,7 @@ import lat.soulware.poi.planning.domain.model.valueobjects.Description;
 import lat.soulware.poi.planning.domain.model.valueobjects.Name;
 import lat.soulware.poi.planning.domain.model.valueobjects.PlanId;
 import lat.soulware.poi.planning.domain.model.valueobjects.Target;
+import lat.soulware.poi.planning.domain.model.valueobjects.TaskId;
 import lat.soulware.poi.shared.domain.model.aggregates.AggregateRoot;
 import lat.soulware.poi.shared.domain.model.aggregates.PackagedAs;
 
@@ -30,7 +33,11 @@ import lat.soulware.poi.shared.domain.model.aggregates.PackagedAs;
  * plans carry the same code.
  *
  * <p>Tasks hang from its activities but are not part of it: there are thousands per activity, and
- * each changes on its own as deliveries arrive.
+ * each changes on its own as deliveries arrive. The plan hears of them when they are defined and
+ * when they are completed, and keeps which are still open under each activity. An activity is
+ * complete once it has tasks and all are completed, an objective once it has activities and all are
+ * complete, and the plan once it has objectives and all are complete. A task defined later opens
+ * its activity again, and with it the objective and the plan.
  */
 @PackagedAs("plan")
 public class Plan extends AggregateRoot<PlanId> {
@@ -144,6 +151,41 @@ public class Plan extends AggregateRoot<PlanId> {
             .orElseThrow(() -> new ObjectiveNotFoundException(List.of(objectiveId)));
 
         objective.defineActivity(id, name, description, measurementUnit, target);
+    }
+
+    /**
+     * Counts a task defined under one of this plan's activities as open.
+     *
+     * @param activityId the activity the task was defined under
+     * @param taskId     the defined task
+     * @throws ActivityNotFoundException if the plan holds no such activity
+     */
+    public void trackTask(ActivityId activityId, TaskId taskId) {
+        this.activity(activityId).trackTask(taskId);
+    }
+
+    /**
+     * Stops counting a completed task as open under one of this plan's activities.
+     *
+     * @param activityId the activity the task was defined under
+     * @param taskId     the completed task
+     * @throws ActivityNotFoundException if the plan holds no such activity
+     */
+    public void recordTaskCompletion(ActivityId activityId, TaskId taskId) {
+        this.activity(activityId).recordTaskCompletion(taskId);
+    }
+
+    /** @return whether it has objectives and every one of them is complete */
+    public boolean isComplete() {
+        return !this.objectives.isEmpty() && this.objectives.stream()
+            .allMatch(objective -> objective.isComplete());
+    }
+
+    private Activity activity(ActivityId activityId) {
+        return this.objectives.stream()
+            .flatMap(objective -> objective.activity(activityId).stream())
+            .findFirst()
+            .orElseThrow(() -> new ActivityNotFoundException(List.of(activityId)));
     }
 
     @Override

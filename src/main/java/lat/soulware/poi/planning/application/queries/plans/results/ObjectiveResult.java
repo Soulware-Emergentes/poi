@@ -12,6 +12,7 @@ import lat.soulware.poi.shared.application.queries.results.QueryResult;
  * @param code        the objective's code, as written
  * @param name        what the objective is called
  * @param description what the objective is
+ * @param completed   whether it has activities and every one of them is complete
  * @param activities  the activities it is pursued through
  */
 public record ObjectiveResult(
@@ -19,6 +20,7 @@ public record ObjectiveResult(
     String code,
     String name,
     String description,
+    boolean completed,
     List<ActivityResult> activities
 ) implements QueryResult {
 

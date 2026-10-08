@@ -11,6 +11,7 @@ import java.util.UUID;
  * @param description     what the activity is
  * @param measurementUnit what it counts toward its target
  * @param target          how many units it sets out to deliver
+ * @param completed       whether it has tasks and every one of them is completed
  */
 public record ActivityResponse(
     UUID id,
@@ -18,6 +19,7 @@ public record ActivityResponse(
     String name,
     String description,
     String measurementUnit,
-    long target
+    long target,
+    boolean completed
 ) {
 }

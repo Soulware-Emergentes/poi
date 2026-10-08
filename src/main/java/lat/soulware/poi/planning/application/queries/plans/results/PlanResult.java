@@ -12,6 +12,7 @@ import lat.soulware.poi.shared.application.queries.results.QueryResult;
  * @param code        the plan's code, as written
  * @param name        what the plan is called
  * @param description what the plan is
+ * @param completed   whether it has objectives and every one of them is complete
  * @param objectives  the objectives it holds
  */
 public record PlanResult(
@@ -19,6 +20,7 @@ public record PlanResult(
     String code,
     String name,
     String description,
+    boolean completed,
     List<ObjectiveResult> objectives
 ) implements QueryResult {
 

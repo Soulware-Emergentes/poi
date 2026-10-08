@@ -13,6 +13,7 @@ import lat.soulware.poi.shared.application.queries.results.QueryResult;
  * @param description     what the activity is
  * @param measurementUnit what it counts toward its target
  * @param target          how many units it sets out to deliver
+ * @param completed       whether it has tasks and every one of them is completed
  */
 public record ActivityResult(
     UUID id,
@@ -20,6 +21,7 @@ public record ActivityResult(
     String name,
     String description,
     String measurementUnit,
-    long target
+    long target,
+    boolean completed
 ) implements QueryResult {
 }

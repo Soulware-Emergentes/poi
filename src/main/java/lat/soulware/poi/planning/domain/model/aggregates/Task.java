@@ -1,5 +1,8 @@
 package lat.soulware.poi.planning.domain.model.aggregates;
 
+import java.time.Instant;
+
+import lat.soulware.poi.planning.domain.model.events.TaskCompleted;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingDescriptionException;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingExecutionDateException;
 import lat.soulware.poi.planning.domain.model.exceptions.MissingSubmissionIdException;
@@ -106,8 +109,9 @@ public abstract class Task extends AggregateRoot<TaskId> {
     }
 
     /**
-     * Completes the task, the submission's delivery confirmed by review. A task already completed
-     * by that delivery is left as it is.
+     * Completes the task, the submission's delivery confirmed by review, and announces it so the
+     * plan can tell whether the task's activity is complete. A task already completed by that
+     * delivery is left as it is.
      *
      * @param submissionId the submission whose delivery review confirmed
      * @throws TaskNotDeliveredException if the task does not hold that submission's delivery
@@ -116,7 +120,11 @@ public abstract class Task extends AggregateRoot<TaskId> {
         if (!this.holdsDeliveryOf(submissionId)) {
             throw new TaskNotDeliveredException(this.code.value(), submissionId);
         }
+        if (this.status == TaskStatus.COMPLETED) {
+            return;
+        }
         this.status = TaskStatus.COMPLETED;
+        this.registerEvent(new TaskCompleted(this.id, this.activityId, Instant.now()));
     }
 
     /**
