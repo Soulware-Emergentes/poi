@@ -1,15 +1,15 @@
 package lat.soulware.poi.planning.application.queries.tasks.projections;
 
-import java.util.List;
 import java.util.Optional;
 
-import lat.soulware.poi.planning.application.queries.tasks.criteria.AllTasks;
 import lat.soulware.poi.planning.application.queries.tasks.criteria.TaskByCode;
 import lat.soulware.poi.planning.application.queries.tasks.criteria.TaskById;
+import lat.soulware.poi.planning.application.queries.tasks.criteria.TasksPage;
 import lat.soulware.poi.planning.application.queries.tasks.results.TaskResult;
+import lat.soulware.poi.planning.application.queries.tasks.results.TasksPageResult;
 import lat.soulware.poi.shared.application.queries.projections.Projection;
 
-/** Single tasks the read store holds. */
+/** The tasks the read store holds, one at a time or a page at a time. */
 public interface TaskProjection extends Projection {
 
     /**
@@ -25,8 +25,8 @@ public interface TaskProjection extends Projection {
     Optional<TaskResult> findById(TaskById criteria);
 
     /**
-     * @param criteria which tasks to read
-     * @return the tasks, ordered by code
+     * @param criteria the page to read, already validated
+     * @return the page, with the size of the whole selection
      */
-    List<TaskResult> findAll(AllTasks criteria);
+    TasksPageResult findPage(TasksPage criteria);
 }

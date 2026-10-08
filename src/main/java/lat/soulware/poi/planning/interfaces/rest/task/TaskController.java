@@ -23,12 +23,12 @@ import lat.soulware.poi.planning.interfaces.rest.task.requests.RelinkDeliveryReq
 import lat.soulware.poi.planning.interfaces.rest.task.requests.ReviewedDeliveryRequest;
 import lat.soulware.poi.planning.interfaces.rest.task.responses.PendingTasksResponse;
 import lat.soulware.poi.planning.interfaces.rest.task.responses.TaskResponse;
-import lat.soulware.poi.planning.interfaces.rest.task.responses.TasksResponse;
+import lat.soulware.poi.planning.interfaces.rest.task.responses.TasksPageResponse;
 
 /**
  * The tasks of the operational plan. People define them, one follow-up visit at a time under an
- * activity, whose code is read from the plans before the task is numbered after it, and list them
- * all.
+ * activity, whose code is read from the plans before the task is numbered after it, and page
+ * through them.
  *
  * <p>Other systems deliver them. A delivery is registered when
  * work is submitted, which takes the task off the pending list, and reviewed later: confirmed, which
@@ -58,10 +58,20 @@ public class TaskController {
         this.planQueryService = planQueryService;
     }
 
-    @Operation(summary = "Returns every task")
+    @Operation(summary = "Returns a paginated set of tasks")
     @GetMapping
-    public TasksResponse all() {
-        return TaskWireMapper.toTasksResponse(this.taskQueryService.all(TaskWireMapper.toAllTasks()));
+    public TasksPageResponse page(
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String code,
+        @RequestParam(required = false) String activityCode,
+        @RequestParam(defaultValue = "executionDate") String sort,
+        @RequestParam(defaultValue = "desc") String direction,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return TaskWireMapper.toTasksPageResponse(this.taskQueryService.page(
+            TaskWireMapper.toTasksPage(status, code, activityCode, sort, direction, page, size)
+        ));
     }
 
     @Operation(summary = "Defines a beneficiary follow-up task under an activity and returns it")

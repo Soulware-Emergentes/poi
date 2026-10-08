@@ -7,13 +7,13 @@ import lat.soulware.poi.planning.application.commands.task.intent.ReopenTask;
 import lat.soulware.poi.planning.application.commands.task.intent.RelinkTaskDelivery;
 import lat.soulware.poi.planning.application.queries.plans.criteria.ActivityById;
 import lat.soulware.poi.planning.application.queries.plans.results.ActivityResult;
-import lat.soulware.poi.planning.application.queries.tasks.criteria.AllTasks;
 import lat.soulware.poi.planning.application.queries.tasks.criteria.PendingTasks;
 import lat.soulware.poi.planning.application.queries.tasks.criteria.TaskByCode;
 import lat.soulware.poi.planning.application.queries.tasks.criteria.TaskById;
+import lat.soulware.poi.planning.application.queries.tasks.criteria.TasksPage;
 import lat.soulware.poi.planning.application.queries.tasks.results.PendingTasksResult;
 import lat.soulware.poi.planning.application.queries.tasks.results.TaskResult;
-import lat.soulware.poi.planning.application.queries.tasks.results.TasksResult;
+import lat.soulware.poi.planning.application.queries.tasks.results.TasksPageResult;
 import lat.soulware.poi.planning.domain.model.valueobjects.ActivityCode;
 import lat.soulware.poi.planning.domain.model.valueobjects.ActivityId;
 import lat.soulware.poi.planning.domain.model.valueobjects.BeneficiaryId;
@@ -29,7 +29,7 @@ import lat.soulware.poi.planning.interfaces.rest.task.requests.ReviewedDeliveryR
 import lat.soulware.poi.planning.interfaces.rest.task.responses.PendingTaskResponse;
 import lat.soulware.poi.planning.interfaces.rest.task.responses.PendingTasksResponse;
 import lat.soulware.poi.planning.interfaces.rest.task.responses.TaskResponse;
-import lat.soulware.poi.planning.interfaces.rest.task.responses.TasksResponse;
+import lat.soulware.poi.planning.interfaces.rest.task.responses.TasksPageResponse;
 import lat.soulware.poi.shared.interfaces.rest.mappers.WireMapper;
 
 /** Converts what {@code TaskController} receives and answers. */
@@ -54,8 +54,16 @@ public final class TaskWireMapper implements WireMapper {
         );
     }
 
-    public static AllTasks toAllTasks() {
-        return new AllTasks();
+    public static TasksPage toTasksPage(
+        String status,
+        String code,
+        String activityCode,
+        String sort,
+        String direction,
+        int page,
+        int size
+    ) {
+        return new TasksPage(status, code, activityCode, sort, direction, page, size);
     }
 
     public static PendingTasks toPendingTasks(String activityCode) {
@@ -100,14 +108,20 @@ public final class TaskWireMapper implements WireMapper {
             result.description(),
             result.status(),
             result.submissionId(),
+            result.executionDate(),
             result.beneficiaryId()
         );
     }
 
-    public static TasksResponse toTasksResponse(TasksResult result) {
-        return new TasksResponse(result.tasks().stream()
-            .map(TaskWireMapper::toTaskResponse)
-            .toList()
+    public static TasksPageResponse toTasksPageResponse(TasksPageResult result) {
+        return new TasksPageResponse(
+            result.content().stream()
+                .map(TaskWireMapper::toTaskResponse)
+                .toList(),
+            result.totalPages(),
+            result.totalElements(),
+            result.actualPage(),
+            result.pageSize()
         );
     }
 

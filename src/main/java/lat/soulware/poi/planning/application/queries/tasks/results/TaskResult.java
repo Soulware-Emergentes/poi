@@ -1,5 +1,6 @@
 package lat.soulware.poi.planning.application.queries.tasks.results;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import lat.soulware.poi.shared.application.queries.results.QueryResult;
@@ -11,6 +12,7 @@ import lat.soulware.poi.shared.application.queries.results.QueryResult;
  * @param description   what the task is
  * @param status        where the task stands, by name
  * @param submissionId  the submission whose delivery the task holds, null while it is pending
+ * @param executionDate when the delivered work was carried out, null while the task is pending
  * @param beneficiaryId the beneficiary a follow-up task is planned to visit
  */
 public record TaskResult(
@@ -18,6 +20,7 @@ public record TaskResult(
     String description,
     String status,
     UUID submissionId,
+    LocalDate executionDate,
     String beneficiaryId
 ) implements QueryResult {
 }
