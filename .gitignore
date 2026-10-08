@@ -45,5 +45,5 @@ logs/
 src/test/java/lat/soulware/poi/*
 !src/test/java/lat/soulware/poi/ApplicationLaunchIT.java
 .github/
-docs/
+/docs/
 deploy/
