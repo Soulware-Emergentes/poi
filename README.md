@@ -4,6 +4,17 @@ A starting point for building a modular monolith with Spring Boot, structured ar
 
 Java 25, Spring Boot 4.1, Spring Modulith 2.1.
 
+## Authentication
+
+Every request carries an access token from staff, the identity provider, signed with a key staff publishes, naming `STAFF_ISSUER` as its issuer and carrying `POI_TOKEN_AUDIENCE` in its audience. A request without one is answered 401 with the usual error envelope.
+
+| Token | Admitted on | Checked |
+|---|---|---|
+| A service's (`token_use: service`), such as sgt's | Endpoints under `/api/v1/tasks/` | `tasks.read` scope for reads, `tasks.write` for writes |
+| A person's (`token_use: user`), from the `poi-web-dev` frontend | Every other endpoint, `/api/v1/tasks` itself included | The role the endpoint needs: `planner`, `analyst` or `admin` |
+
+A token of the wrong kind for an endpoint, or without the scope or role it needs, is answered 403. The claims a person's subject and roles are read from are set in `poi.security.claims.*`, and the frontend's origin in `POI_WEB_ORIGIN`.
+
 ## Requirements
 
 Docker has to be available for `./mvnw verify`. That half of the suite starts a throwaway Postgres container, so nothing needs to be installed or running beforehand, and it never touches a local database.
