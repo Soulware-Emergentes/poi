@@ -1,0 +1,24 @@
+package lat.soulware.poi.planning.interfaces.rest.plan.responses;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * An objective of a plan, with its activities ordered by code.
+ *
+ * @param id          the objective's identity
+ * @param code        the objective's code
+ * @param name        what the objective is called
+ * @param description what the objective is
+ * @param completed   whether it has activities and every one of them is complete
+ * @param activities  the activities it is pursued through
+ */
+public record ObjectiveResponse(
+    UUID id,
+    String code,
+    String name,
+    String description,
+    boolean completed,
+    List<ActivityResponse> activities
+) {
+}
