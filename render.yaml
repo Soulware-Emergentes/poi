@@ -1,10 +1,3 @@
-databases:
-  - name: poi-dev-db
-    databaseName: poi
-    user: poi
-    plan: basic-256mb
-    region: oregon
-
 services:
   - type: web
     name: poi-dev
@@ -14,24 +7,18 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: dev
-      - key: PGHOST
-        fromDatabase: { name: poi-dev-db, property: host }
-      - key: PGPORT
-        fromDatabase: { name: poi-dev-db, property: port }
-      - key: PGDATABASE
-        fromDatabase: { name: poi-dev-db, property: database }
       - key: FLYWAY_URL
-        value: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+        sync: false
       - key: FLYWAY_USERNAME
-        fromDatabase: { name: poi-dev-db, property: user }
+        sync: false
       - key: FLYWAY_PASSWORD
-        fromDatabase: { name: poi-dev-db, property: password }
+        sync: false
       - key: DB_URL
-        value: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+        sync: false
       - key: DB_USERNAME
-        fromDatabase: { name: poi-dev-db, property: user }
+        sync: false
       - key: DB_PASSWORD
-        fromDatabase: { name: poi-dev-db, property: password }
+        sync: false
       - key: SERVER_PORT
         value: "10000"
       # staff-dev's public URL, e.g. https://staff-dev.onrender.com
