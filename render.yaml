@@ -1,0 +1,45 @@
+databases:
+  - name: poi-dev-db
+    databaseName: poi
+    user: poi
+    plan: basic-256mb
+    region: oregon
+
+services:
+  - type: web
+    name: poi-dev
+    runtime: docker
+    plan: free
+    region: oregon
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: PGHOST
+        fromDatabase: { name: poi-dev-db, property: host }
+      - key: PGPORT
+        fromDatabase: { name: poi-dev-db, property: port }
+      - key: PGDATABASE
+        fromDatabase: { name: poi-dev-db, property: database }
+      - key: FLYWAY_URL
+        value: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+      - key: FLYWAY_USERNAME
+        fromDatabase: { name: poi-dev-db, property: user }
+      - key: FLYWAY_PASSWORD
+        fromDatabase: { name: poi-dev-db, property: password }
+      - key: DB_URL
+        value: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+      - key: DB_USERNAME
+        fromDatabase: { name: poi-dev-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: poi-dev-db, property: password }
+      - key: SERVER_PORT
+        value: "10000"
+      # staff-dev's public URL, e.g. https://staff-dev.onrender.com
+      - key: STAFF_ISSUER
+        sync: false
+      - key: POI_TOKEN_AUDIENCE
+        value: poi-api-dev
+      - key: POI_WEB_ORIGIN
+        value: http://localhost:5174
+      - key: API_DOCS_ENABLED
+        value: "true"
