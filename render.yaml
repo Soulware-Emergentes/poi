@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: poi-dev
+    runtime: docker
+    plan: free
+    region: oregon
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: FLYWAY_URL
+        sync: false
+      - key: FLYWAY_USERNAME
+        sync: false
+      - key: FLYWAY_PASSWORD
+        sync: false
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: SERVER_PORT
+        value: "10000"
+      # staff-dev's public URL, e.g. https://staff-dev.onrender.com
+      - key: STAFF_ISSUER
+        sync: false
+      - key: POI_TOKEN_AUDIENCE
+        value: poi-api-dev
+      - key: POI_WEB_ORIGIN
+        value: http://localhost:5174
+      - key: API_DOCS_ENABLED
+        value: "true"
